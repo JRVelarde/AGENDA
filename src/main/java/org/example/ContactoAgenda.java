@@ -1,9 +1,12 @@
 package org.example;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
 
 public class ContactoAgenda {
@@ -19,6 +22,16 @@ public class ContactoAgenda {
         }
     }
 
+    public void cargarDesdeCSV(String nombreArchivo) throws IOException{
+        try (Scanner sc = new Scanner(new File(nombreArchivo))){
+            while (sc.hasNextLine()) {
+                String linea = sc.nextLine();
+                Contacto contacto = Contacto.datosDesdeCSV(linea);
+                contactos.add(contacto);
+            }
+        }
+    }
+
     public ContactoAgenda(){
         this.contactos = new ArrayList<>();
     }
@@ -28,8 +41,13 @@ public class ContactoAgenda {
     }
 
     public void eliminarContacto(final UUID userID){
-        contactos.removeIf(contacto -> contacto.getUserId().equals(userID));
+        for (Contacto contacto : contactos) {
+            if (contacto.getUserId().equals(userID)) {
+                contacto.setUserId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            }
+        }
     }
+
 
     public void mostrarContactos(){
         for (Contacto contacto : contactos){

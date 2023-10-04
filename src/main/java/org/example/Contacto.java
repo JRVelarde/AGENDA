@@ -22,6 +22,14 @@ public class Contacto {
         this.edad = edad;
 
     }
+    public static Contacto datosDesdeCSV (String csvString){
+        String[] partes = csvString.split(",");
+        UUID userID = UUID.fromString(partes[0]);
+        String nombre = partes[1];
+        String tlf = partes[2];
+        int edad = Integer.parseInt(partes[3]);
+        return new Contacto(userID, nombre, tlf, edad);
+    }
 
     public String toCSVString(){
         return userId.toString() + "," + Nombre + "," + Telefono + "," + edad;

@@ -17,9 +17,19 @@ public class App
             System.out.println("Uso: java App <nombre_archivo.csv");
             return;
         }
+
+
+
         String csvArchivo = args[0];
         ContactoAgenda agenda = new ContactoAgenda();
         Scanner sc = new Scanner(System.in);
+
+        try{
+            agenda.cargarDesdeCSV(csvArchivo);
+        }catch (IOException e){
+            System.out.println("Error al cargar los datos ");
+            e.printStackTrace();
+        }
 
         while(true){
             System.out.println("1.Buscar por código " +
@@ -49,8 +59,12 @@ public class App
                     }
                     break;
                 case 3:
-                    System.out.println("Agenda Completa:");
-                    agenda.mostrarContactos();
+                    if(!agenda.getContactos().isEmpty()) {
+                        System.out.println("Agenda Completa:");
+                        agenda.mostrarContactos();
+                    }else{
+                        System.out.println("No hay contactos en la agenda");
+                    }
                     break;
                 case 4:
                     System.out.println("Escribe los datos del contacto");
