@@ -1,80 +1,39 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 import java.util.UUID;
 
-public class ContactoAgenda {
-    private List<Contacto> contactos;
+class ContactAgenda {
+    private String fileName;
 
-    public void guardarEnCSV(String nombreArchivo) throws IOException{
-        try (RandomAccessFile ra = new RandomAccessFile(nombreArchivo,"rw")){
-            for (Contacto contacto: contactos){
-                String csvString = contacto.toCSVString() + "\n";
-                ra.writeBytes(csvString);
-            }
-            System.out.println("Agenda guardada en " + nombreArchivo);
+    public ContactAgenda(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void addContact(Contact contact) throws IOException {
+        try (RandomAccessFile file = new RandomAccessFile(fileName, "rw")) {
+            String csvString = contact.toCSVString() + "\n";
+            file.seek(file.length());
+            file.writeBytes(csvString);
+            System.out.println("Contacto añadido y guardado en " + fileName);
         }
     }
 
-    public void cargarDesdeCSV(String nombreArchivo) throws IOException{
-        try (Scanner sc = new Scanner(new File(nombreArchivo))){
-            while (sc.hasNextLine()) {
-                String linea = sc.nextLine();
-                Contacto contacto = Contacto.datosDesdeCSV(linea);
-                contactos.add(contacto);
-            }
-        }
-    }
-
-    public ContactoAgenda(){
-        this.contactos = new ArrayList<>();
-    }
-
-    public void ContactoNuevo(Contacto contacto){
-        contactos.add(contacto);
-    }
-
-    public void eliminarContacto(final UUID userID){
-        for (Contacto contacto : contactos) {
-            if (contacto.getUserId().equals(userID)) {
-                contacto.setUserId(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    public void cambiarUUIDToCero(UUID userId) throws IOException {
+        try (RandomAccessFile file = new RandomAccessFile(fileName, "rw")) {
+            while (file.getFilePointer() < file.length()) {
+                String line = file.readLine();
+                if (line.startsWith(userId.toString())) {
+                    String[] parts = line.split(",");
+                    parts[0] = "00000000-0000-0000-0000-000000000000";
+                    String newLine = String.join(",", parts);
+                    file.seek(file.getFilePointer() - line.length() - 1);
+                    file.writeBytes(newLine + "\n");
+                    System.out.println("UUID cambiado a 00000000-0000-0000-0000-000000000000 en " + fileName);
+                    break;
+                }
             }
         }
-    }
-
-
-    public void mostrarContactos(){
-        for (Contacto contacto : contactos){
-            System.out.println(contacto);
-        }
-    }
-
-    public List<Contacto> buscarPorUserId(UUID userId){
-        List<Contacto> encontrarContacto = new ArrayList<>();
-        for(Contacto contacto : contactos){
-            if (contacto.getUserId().equals(userId)){
-                encontrarContacto.add(contacto);
-            }
-        }
-        return encontrarContacto;
-    }
-
-    public List<Contacto> getContactos(){
-        return contactos;
-    }
-    public List<Contacto> buscarPorNombre(String iniciales){
-        List<Contacto> encontrarContacto = new ArrayList<>();
-        for(Contacto contacto : contactos){
-            if (contacto.getNombre().toLowerCase().startsWith(iniciales.toLowerCase())){
-                encontrarContacto.add(contacto);
-            }
-        }
-        return encontrarContacto;
     }
 }
